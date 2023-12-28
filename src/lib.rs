@@ -149,6 +149,22 @@ pub fn send_ctrl_n(abc_window: &UIElement, save_changes: bool) -> uiautomation::
     Ok(())
 }
 
+/// Attempt to read the value of any RT6ThunderTextBox on a given ABC Client4 screen
+///
+/// # Arguments
+///
+/// * `screen` - The `UIElement` which represents the Client4 screen to look for textboxes on
+/// * `box_index` - The index (starting from 0) of the RT6ThunderTextBox to read
+///
+/// # Returns
+///
+/// If the textbox is found successfully, return the string value of that textbox. If the value is
+/// empty, return `String::new()`
+///
+/// # Errors
+///
+/// Return `Err(uiautomation::Error)` if the textbox cannot be found or its value fails to convert
+/// to string for some reason
 pub fn read_text_box_value(screen: &UIElement, box_index: usize) -> uiautomation::Result<String> {
     let automation = UIAutomation::new()?;
 
