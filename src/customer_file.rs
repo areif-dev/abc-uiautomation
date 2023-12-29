@@ -100,8 +100,5 @@ pub fn load_customer_record(
     customer_code_control.click()?;
     customer_code_control.send_keys(&format!("{}{{enter}}", customer_code), SHORT_WAIT_MS)?;
 
-    let walker = automation.get_control_view_walker()?;
-    crate::print_element(&walker, customer_screen, 0)?;
-
     Ok(())
 }
