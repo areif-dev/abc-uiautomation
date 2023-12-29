@@ -86,3 +86,19 @@ pub fn jdf_account_by_customer(
     let jdf_account_variant = jdf_account_text_box.get_property_value(UIProperty::ValueValue)?;
     jdf_account_variant.get_string()
 }
+
+pub fn load_customer_record(
+    customer_screen: &UIElement,
+    customer_code: &str,
+) -> uiautomation::Result<()> {
+    let automation = UIAutomation::new()?;
+
+    let customer_code_control = create_matcher_wrapper(&automation)?
+        .classname("ThunderRT6TextBox")
+        .from(customer_screen.to_owned())
+        .find_first()?;
+    customer_code_control.click()?;
+    customer_code_control.send_keys(&format!("{}{{enter}}", customer_code), SHORT_WAIT_MS)?;
+
+    Ok(())
+}
