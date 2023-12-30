@@ -87,6 +87,24 @@ pub fn jdf_account_by_customer(
     jdf_account_variant.get_string()
 }
 
+/// Controls the Client4 Customer Screen to load a specific customer file by entering the
+/// customer's id into the appropriate field. 
+///
+/// # Arguments 
+///
+/// * `customer_screen` - The `UIElement` that represents the Customer Screen in the ABC Client4
+/// program
+/// * `customer_code` - The unique identifier for the customer to load 
+///
+/// # Returns 
+///
+/// If successful, return unit type. If there is a problem locating the textbox to enter the
+/// customer code into or if there is a problem sending keys, then return `Err(uiautomation::Error)`
+///
+/// # Errors 
+///
+/// Will return `Err(uiautomation::Error)` if there is a problem locating the textbox to enter the
+/// customer code into or if there is a problem sending keys
 pub fn load_customer_record(
     customer_screen: &UIElement,
     customer_code: &str,
