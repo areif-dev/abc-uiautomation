@@ -1,5 +1,6 @@
 pub mod accounts_receivable;
 pub mod customer_file;
+pub mod inventory;
 pub mod reports;
 
 use std::{thread, time};
