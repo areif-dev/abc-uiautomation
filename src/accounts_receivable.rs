@@ -326,3 +326,152 @@ pub fn is_invoice_fully_paid(
 
     Ok(paid_control_value == total_control_value)
 }
+
+#[cfg(test)]
+mod tests {
+    use chrono::NaiveDate;
+
+    use crate::inventory::Item;
+
+    use super::Invoice;
+
+    #[test]
+    fn test_from_tsv() {
+        let tsv_txt = "	  INVOICE #540970			STORE NAME		PO BOX 123		123 STREET ADR		CITY ST  12345		(123)456-7890													Cash Sale																		-------------------------------------------------------------------------------	CUST.CODE		CUST.P/O#		SHIP VIA		SLS		TAX CODE		TERMS		  INVOICE	DATE	.CASH				PA		CASH	12/ 6/24		-------------------------------------------------------------------------------		QUANTITY  ITEM #     DESCRIPTION                                      SELL PRICE       AMOUNT	
+ 	3	 	PURSTRATEGYH	STRATEGY HEALTHY EDGE		25.00	EA	75.00	T		
+ 	4	 	SS137386	3' PRM MINI FLAKE SHAVINGS BEDDING		10.00		40.00	T	
+ 	-1	 	SS379776	QT GLAZING COMPOUND		11.24	EA	-11.24		
+ 	12	 	FAST	MIDWEST FASTENERS		.20	EA	2.40	T		
+ 	1	 	SS764720	GAL RAINX WINDOW WASH FLUID		5.49		5.49	T		
+                     AMERICAS CHOICE	
+ 		 	PA	SALES TAX on $115.00			%	6.90			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+						--------------------------------------------------------------------------------			TOTAL INVOICE:	121.90	
+X1234 Auth:012345 Seq:1234567890 x____________________________	Amount:	121.90";
+
+        let parsed_invoices = Invoice::parse_from_tsv(tsv_txt).unwrap();
+
+        let line_items: Vec<(Item, isize)> = vec![
+            (
+                Item {
+                    sku: "PURSTRATEGYH".to_string(),
+                    description: Some("STRATEGY HEALTHY EDGE".to_string()),
+                    list: 25.0,
+                    cost: 0.0,
+                    vendor_id: None,
+                    upc: None,
+                },
+                3,
+            ),
+            (
+                Item {
+                    sku: "SS137386".to_string(),
+                    description: Some("3' PRM MINI FLAKE SHAVINGS BEDDING".to_string()),
+                    list: 10.0,
+                    cost: 0.0,
+                    vendor_id: None,
+                    upc: None,
+                },
+                4,
+            ),
+            (
+                Item {
+                    sku: "SS379776".to_string(),
+                    description: Some("QT GLAZING COMPOUND".to_string()),
+                    list: 11.24,
+                    cost: 0.0,
+                    vendor_id: None,
+                    upc: None,
+                },
+                -1,
+            ),
+            (
+                Item {
+                    sku: "FAST".to_string(),
+                    description: Some("MIDWEST FASTENERS".to_string()),
+                    list: 0.20,
+                    cost: 0.0,
+                    vendor_id: None,
+                    upc: None,
+                },
+                12,
+            ),
+            (
+                Item {
+                    sku: "SS764720".to_string(),
+                    description: Some("GAL RAINX WINDOW WASH FLUID".to_string()),
+                    list: 5.49,
+                    cost: 0.0,
+                    vendor_id: None,
+                    upc: None,
+                },
+                1,
+            ),
+            (
+                Item {
+                    sku: "PA".to_string(),
+                    description: Some("SALES TAX on $115.00".to_string()),
+                    list: 6.9,
+                    cost: 0.0,
+                    vendor_id: None,
+                    upc: None,
+                },
+                1,
+            ),
+        ];
+        let test_invoice = Invoice {
+            number: 540970,
+            date: NaiveDate::from_ymd_opt(2024, 12, 6).unwrap(),
+            customer_id: ".CASH".to_string(),
+            line_items,
+        };
+
+        assert_eq!(vec![test_invoice], parsed_invoices);
+    }
+}
