@@ -1,5 +1,40 @@
 use crate::{wait, UIElement, SHORT_WAIT_MS};
 
+/// Control ABC Client4 to generate a 214 report (BILL DETAIL)
+///
+/// # Arguments
+///
+/// * `abc_window` - The `UIElement` representing the Client4 window
+/// * `starting_bill` - The first bill to send to send to the 214
+/// * `ending_bill` - The last invoice to send to the 214 report
+///
+/// # Returns
+///
+/// Will return unit type if successful. Return `uiautomation::Error` if UI manipulation fails at
+/// any point
+///
+/// # Errors
+///
+/// Will return `Err(uiautomation::Error)` if UI manipulation fails at any point
+pub fn generate_report_214(
+    abc_window: &UIElement,
+    starting_bill: u64,
+    ending_bill: u64,
+) -> uiautomation::Result<()> {
+    abc_window.send_keys("{F10}2", SHORT_WAIT_MS * 3)?;
+    wait(SHORT_WAIT_MS * 5);
+    abc_window.send_keys("14{enter}", SHORT_WAIT_MS / 2)?;
+    wait(SHORT_WAIT_MS * 5);
+    abc_window.send_keys(
+        &format!(
+            "{{enter}}{}{{enter}}{}{{enter}}t",
+            starting_bill, ending_bill
+        ),
+        SHORT_WAIT_MS / 2,
+    )?;
+    Ok(())
+}
+
 /// Control ABC Client4 to generate a 323 report (CUSTOMER INVOICE PAYMENTS)
 ///
 /// # Arguments
