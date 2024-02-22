@@ -5,8 +5,8 @@ use crate::{wait, UIElement, SHORT_WAIT_MS};
 /// # Arguments
 ///
 /// * `abc_window` - The `UIElement` representing the Client4 window
-/// * `starting_sku` - The first bill to send to send to the 11
-/// * `ending_sku` - The last invoice to send to the 11 report
+/// * `starting_sku` - The first sku to send to send to the 11
+/// * `ending_sku` - The last sku to send to the 11 report
 ///
 /// # Returns
 ///
@@ -18,8 +18,8 @@ use crate::{wait, UIElement, SHORT_WAIT_MS};
 /// Will return `Err(uiautomation::Error)` if UI manipulation fails at any point
 pub fn generate_report_11(
     abc_window: &UIElement,
-    starting_sku: u64,
-    ending_sku: u64,
+    starting_sku: &str,
+    ending_sku: &str,
 ) -> uiautomation::Result<()> {
     abc_window.send_keys("{F10}1", SHORT_WAIT_MS * 3)?;
     wait(SHORT_WAIT_MS * 5);
@@ -40,7 +40,7 @@ pub fn generate_report_11(
 ///
 /// * `abc_window` - The `UIElement` representing the Client4 window
 /// * `starting_bill` - The first bill to send to send to the 214
-/// * `ending_bill` - The last invoice to send to the 214 report
+/// * `ending_bill` - The last bill to send to the 214 report
 ///
 /// # Returns
 ///
