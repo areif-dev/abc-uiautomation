@@ -34,7 +34,7 @@ pub fn generate_simple_report(
 ) -> uiautomation::Result<()> {
     abc_window.send_keys(&format!("{{F10}}{}", menu), SHORT_WAIT_MS * 3)?;
     wait(SHORT_WAIT_MS * 5);
-    abc_window.send_keys(&format!("{}{{enter}}", report_number), SHORT_WAIT_MS / 2)?;
+    abc_window.send_keys(&format!("{}{{enter}}", report), SHORT_WAIT_MS / 2)?;
     wait(SHORT_WAIT_MS * 5);
     abc_window.send_keys(
         &format!("{{enter}}{}{{enter}}{}{{enter}}t", starting_at, ending_with),
