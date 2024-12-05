@@ -188,3 +188,26 @@ pub fn read_text_box_value(screen: &UIElement, box_index: usize) -> uiautomation
         .get_property_value(uiautomation::types::UIProperty::ValueValue)?
         .get_string()?)
 }
+
+pub fn login(
+    abc_window: &UIElement,
+    username: &str,
+    password: &str,
+) -> uiautomation::Result<String> {
+    let automation = UIAutomation::new()?;
+
+    if let Err(_) = create_matcher_wrapper(&automation)?
+        .contains_name("Utilities - System Date and Time (*)")
+        .find_first()
+    {
+        abc_window.send_keys("{F10}*", SHORT_WAIT_MS * 3)?;
+    }
+
+    let login_window = create_matcher_wrapper(&automation)?
+        .contains_name("Utilities - System Date and Time (*)")
+        .find_first()?;
+
+    let walker = automation.get_control_view_walker()?;
+    print_element(&walker, &login_window, 0)?;
+    Ok("Good".to_string())
+}
