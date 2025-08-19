@@ -8,7 +8,10 @@ use uiautomation::{UIAutomation, UIMatcher, UITreeWalker};
 
 pub use uiautomation::UIElement;
 
-pub const SHORT_WAIT_MS: u64 = 100;
+pub const MILLIS: u64 = 1;
+pub const SECONDS: u64 = 1000 * MILLIS;
+pub const MINUTES: u64 = 60 * SECONDS;
+pub const SHORT_WAIT_MS: u64 = 100 * MILLIS;
 
 /// Convenience function that wraps `UIAutomation.create_matcher()`. Sets `from` to the root
 /// element, and sets the `timeout` to `SHORT_WAIT_MS * 30`
@@ -189,25 +192,82 @@ pub fn read_text_box_value(screen: &UIElement, box_index: usize) -> uiautomation
         .get_string()?)
 }
 
-pub fn login(
-    abc_window: &UIElement,
-    username: &str,
-    password: &str,
-) -> uiautomation::Result<String> {
+pub fn data_file_is_ready(path: &str) -> Result<bool, std::io::Error> {
+    match std::fs::OpenOptions::new()
+        .append(true)
+        .create(false)
+        .open(path)
+    {
+        Ok(_) => return Ok(true),
+        Err(e) => match e.raw_os_error() {
+            Some(i) => {
+                // Error 32 means that the file is being written to by another program. This is
+                // expected with large data exports from ABC
+                if i == 32 {
+                    return Ok(false);
+                } else {
+                    return Err(e);
+                }
+            }
+            None => {
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    "Encountered unexpected error which checking for a file",
+                ))
+            }
+        },
+    }
+}
+
+pub fn find_popup(abc_window: &UIElement) -> uiautomation::Result<Option<UIElement>> {
+    let automation = UIAutomation::new()?;
+    Ok(automation
+        .create_matcher()
+        .timeout(1 * SECONDS)
+        .from(abc_window.to_owned())
+        .classname("ThunderRT6FormDC")
+        .contains_name("Error")
+        .find_first()
+        .ok())
+}
+
+pub fn login(abc_window: &UIElement, username: &str, password: &str) -> uiautomation::Result<()> {
     let automation = UIAutomation::new()?;
 
-    if let Err(_) = create_matcher_wrapper(&automation)?
-        .contains_name("Utilities - System Date and Time (*)")
-        .find_first()
-    {
-        abc_window.send_keys("{F10}*", SHORT_WAIT_MS * 3)?;
+    abc_window.send_keys("{F10}*", SHORT_WAIT_MS / 2)?;
+    if let Some(u) = find_popup(&abc_window)? {
+        return Err(uiautomation::Error::new(
+            2,
+            &format!("Unexpected popup when going to login screen: {:?}", u),
+        ));
     }
 
     let login_window = create_matcher_wrapper(&automation)?
         .contains_name("Utilities - System Date and Time (*)")
         .find_first()?;
 
-    let walker = automation.get_control_view_walker()?;
-    print_element(&walker, &login_window, 0)?;
-    Ok("Good".to_string())
+    login_window.send_keys(&format!("{}{{enter}}", username), SHORT_WAIT_MS / 2)?;
+
+    if let Some(u) = find_popup(&abc_window)? {
+        return Err(uiautomation::Error::new(
+            2,
+            &format!(
+                "Unexpected popup when submitting username on login screen: {:?}",
+                u
+            ),
+        ));
+    }
+
+    login_window.send_keys(&format!("{}{{enter}}", password), SHORT_WAIT_MS)?;
+    if let Some(u) = find_popup(&abc_window)? {
+        println!("{:?}", u.get_bounding_rectangle()?);
+        return Err(uiautomation::Error::new(
+            2,
+            &format!(
+                "Unexpected popup when submitting password on login screen: {:?}",
+                u
+            ),
+        ));
+    }
+    Ok(())
 }
