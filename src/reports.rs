@@ -164,7 +164,7 @@ pub fn generate_report_710(
     abc_window.send_keys("{enter}", SHORT_WAIT_MS)?;
     wait(SHORT_WAIT_MS);
     abc_window.send_keys(
-        &format!("{}{{enter}}{}{{enter}}t", starting_at, ending_with),
+        &format!("{}{{enter}}{}{{enter}}S", starting_at, ending_with),
         SHORT_WAIT_MS * 2,
     )?;
     Ok(())
