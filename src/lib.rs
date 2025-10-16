@@ -6,6 +6,7 @@ pub mod reports;
 use std::{thread, time};
 use uiautomation::{UIAutomation, UIMatcher, UITreeWalker};
 
+pub use uiautomation::Error;
 pub use uiautomation::UIElement;
 
 pub const MILLIS: u64 = 1;
@@ -90,7 +91,7 @@ pub fn print_element(
         "classname: '{}', name: '{}', value: '{}'",
         element.get_classname()?,
         element.get_name()?,
-        element.get_property_value(uiautomation::types::UIProperty::ValueValue)?
+        element.get_property_value(uiautomation::types::UIProperty::ValueValue)?,
     );
 
     if let Ok(child) = walker.get_first_child(&element) {
@@ -190,6 +191,47 @@ pub fn read_text_box_value(screen: &UIElement, box_index: usize) -> uiautomation
     Ok(desired_txtbx
         .get_property_value(uiautomation::types::UIProperty::ValueValue)?
         .get_string()?)
+}
+
+/// Controls Client4 to enter text into a text input field
+///
+/// # Arguments
+/// * `screen` - The Client4 screen to send the input to
+/// * `box_index` - The zero based index of the ThunderRT6TextBox to send input to
+/// * `value` - What to enter into the text box
+///
+/// # Errors
+/// Forwards any of the following automation errors:
+/// * Failing to create a new instance of the controller
+/// * Failing to Find a text input at the index listed
+/// * Failing to send input to the specified text box
+pub fn set_text_box_value(
+    screen: &UIElement,
+    box_index: usize,
+    value: impl ToString,
+) -> uiautomation::Result<()> {
+    let automation = UIAutomation::new()?;
+    let all_text_boxes = create_matcher_wrapper(&automation)?
+        .from(screen.to_owned())
+        .classname("ThunderRT6TextBox")
+        .find_all()?;
+
+    let desired_txtbx = match all_text_boxes.get(box_index) {
+        Some(b) => b,
+        None => {
+            return Err(uiautomation::Error::new(
+                2,
+                &format!("No textbox found at index {}", box_index),
+            ))
+        }
+    };
+    desired_txtbx.click()?;
+    desired_txtbx.send_keys(
+        &format!("{{Delete}}{}{{Enter}}", value.to_string()),
+        SHORT_WAIT_MS,
+    )?;
+
+    Ok(())
 }
 
 pub fn data_file_is_ready(path: &str) -> Result<bool, std::io::Error> {
