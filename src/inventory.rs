@@ -1,4 +1,4 @@
-use ean13::Ean13;
+use gtin::Gtin;
 use uiautomation::{
     errors::{ERR_INACTIVE, ERR_NOTFOUND},
     UIAutomation, UIElement,
@@ -108,7 +108,7 @@ pub fn load_item(inventory_window: &UIElement, item_number: &str) -> uiautomatio
 /// * Failing to send keyboard input to the UPC text field
 /// * Failing to find or send input to the confirmation dialog that pops up to confirm adding a
 /// UPC, if it exists.
-pub fn set_upc(inventory_window: &UIElement, upc: Ean13) -> uiautomation::Result<()> {
+pub fn set_upc(inventory_window: &UIElement, upc: Gtin) -> uiautomation::Result<()> {
     if !inventory_window
         .get_name()?
         .starts_with("Inventory - Items (I)")
@@ -119,7 +119,7 @@ pub fn set_upc(inventory_window: &UIElement, upc: Ean13) -> uiautomation::Result
         ))?;
     }
     let automation = UIAutomation::new()?;
-    set_text_box_value(inventory_window, 38, upc.to_upca_string())?;
+    set_text_box_value(inventory_window, 38, upc.to_string_no_padding())?;
     wait(SHORT_WAIT_MS * 3);
     if let Ok(confirm) = create_matcher_wrapper(&automation)?
         .classname("ThunderRT6FormDC")
