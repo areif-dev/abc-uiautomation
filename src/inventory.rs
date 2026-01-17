@@ -241,7 +241,7 @@ pub fn set_list(inventory_window: &UIElement, list: &BigDecimal) -> uiautomation
         ))?;
     }
 
-    set_text_box_value(&inventory_window, 25, list.to_string())?;
+    set_text_box_value(&inventory_window, 25, list)?;
     Ok(())
 }
 
@@ -256,7 +256,7 @@ pub fn set_cost(inventory_window: &UIElement, cost: &BigDecimal) -> uiautomation
         ))?;
     }
 
-    set_text_box_value(&inventory_window, 26, cost.to_string())?;
+    set_text_box_value(&inventory_window, 26, cost)?;
     Ok(())
 }
 
@@ -288,4 +288,15 @@ pub fn set_sale_gl(inventory_window: &UIElement, sale_gl: u32) -> uiautomation::
 
     set_text_box_value(&inventory_window, 43, sale_gl.to_string())?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use bigdecimal::BigDecimal;
+
+    #[test]
+    fn test_big_decimal() {
+        let price: BigDecimal = "4.99".parse().unwrap();
+        assert_eq!(format!("{}", price), String::from("4.99"));
+    }
 }
