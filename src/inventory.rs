@@ -241,7 +241,7 @@ pub fn set_list(inventory_window: &UIElement, list: &BigDecimal) -> uiautomation
         ))?;
     }
 
-    set_text_box_value(&inventory_window, 25, list)?;
+    set_text_box_value(&inventory_window, 25, format!("{:.2}", list))?;
     Ok(())
 }
 
@@ -256,7 +256,7 @@ pub fn set_cost(inventory_window: &UIElement, cost: &BigDecimal) -> uiautomation
         ))?;
     }
 
-    set_text_box_value(&inventory_window, 26, cost)?;
+    set_text_box_value(&inventory_window, 26, format!("{:.2}", cost))?;
     Ok(())
 }
 
