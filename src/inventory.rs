@@ -215,7 +215,7 @@ pub fn set_vendor(inventory_window: &UIElement, vendor: &str) -> uiautomation::R
     Ok(())
 }
 
-pub fn set_weight(inventory_window: &UIElement, weight: &str) -> uiautomation::Result<()> {
+pub fn set_weight(inventory_window: &UIElement, weight: f64) -> uiautomation::Result<()> {
     if !inventory_window
         .get_name()?
         .starts_with("Inventory - Items (I)")
@@ -226,7 +226,7 @@ pub fn set_weight(inventory_window: &UIElement, weight: &str) -> uiautomation::R
         ))?;
     }
 
-    set_text_box_value(&inventory_window, 15, weight)?;
+    set_text_box_value(&inventory_window, 15, format!("{:.2}", weight))?;
     Ok(())
 }
 
