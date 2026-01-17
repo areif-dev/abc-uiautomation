@@ -1,6 +1,6 @@
 use uiautomation::UIAutomation;
 
-use crate::{print_element, wait, UIElement, SHORT_WAIT_MS};
+use crate::{wait, UIElement, SHORT_WAIT_MS};
 
 /// Control ABC Client4 to generate any simple report that follows the pattern:
 /// * Open F10

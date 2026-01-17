@@ -67,19 +67,24 @@ pub fn ensure_abc() -> uiautomation::Result<UIElement> {
 ///
 /// # Arguments
 ///
-/// * `walker` - Instance of `UITreeWalker` that traverses the tree of elements
 /// * `element` - The `UIElement` to start printing from
-/// * `level` - How many levels deep into the tree the function is. This is used to print
-/// offsetting spaces, so the output appears as a hierarchy
 ///
 /// # Returns
 ///
-/// If successful, return unit type. If a failure occurs, return `uiautomation::Error`
+/// If successful, return unit type. If a failure occurs, return [`uiautomation::Error`]
 ///
 /// # Errors
 ///
-/// Will return `Err(uiautomation::Error)` if an element cannot be found
-pub fn print_element(
+/// Will return [`uiautomation::Error`] if an element cannot be found
+pub fn print_element(element: &UIElement) -> uiautomation::Result<()> {
+    print_element_helper(
+        &uiautomation::UIAutomation::new()?.get_control_view_walker()?,
+        element,
+        0,
+    )
+}
+
+fn print_element_helper(
     walker: &UITreeWalker,
     element: &UIElement,
     level: usize,
@@ -95,11 +100,11 @@ pub fn print_element(
     );
 
     if let Ok(child) = walker.get_first_child(&element) {
-        print_element(walker, &child, level + 1)?;
+        print_element_helper(walker, &child, level + 1)?;
 
         let mut next = child;
         while let Ok(sibling) = walker.get_next_sibling(&next) {
-            print_element(walker, &sibling, level + 1)?;
+            print_element_helper(walker, &sibling, level + 1)?;
 
             next = sibling;
         }
