@@ -109,7 +109,7 @@ pub fn load_item(inventory_window: &UIElement, item_number: &str) -> uiautomatio
 /// * Failing to send keyboard input to the UPC text field
 /// * Failing to find or send input to the confirmation dialog that pops up to confirm adding a
 /// UPC, if it exists.
-pub fn set_upc(inventory_window: &UIElement, upc: Gtin) -> uiautomation::Result<()> {
+pub fn set_upc(inventory_window: &UIElement, upc: &Gtin) -> uiautomation::Result<()> {
     if !inventory_window
         .get_name()?
         .starts_with("Inventory - Items (I)")
