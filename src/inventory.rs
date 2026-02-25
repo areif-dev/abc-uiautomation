@@ -307,6 +307,65 @@ pub fn clear_upc(inventory_window: &UIElement, delete_fully: bool) -> uiautomati
     Ok(())
 }
 
+pub fn get_alt_sku(inventory_window: &UIElement, sku_index: u8) -> uiautomation::Result<String> {
+    if sku_index > 2 {
+        return Err(uiautomation::Error::new(
+            ERR_NONE,
+            "sku_index must be 0, 1, or 2",
+        ));
+    }
+
+    if !inventory_window
+        .get_name()?
+        .starts_with("Inventory - Items (I)")
+    {
+        return Err(uiautomation::Error::new(
+            ERR_INACTIVE,
+            "Inventory window is not open in `get_alt_sku`",
+        ))?;
+    }
+
+    read_text_box_value(inventory_window, 35usize + usize::from(sku_index))
+}
+
+pub fn set_alt_sku(
+    inventory_window: &UIElement,
+    alt_sku: &str,
+    sku_index: u8,
+) -> uiautomation::Result<()> {
+    if sku_index > 2 {
+        return Err(uiautomation::Error::new(
+            ERR_NONE,
+            "sku_index must be 0, 1, or 2",
+        ));
+    }
+
+    if !inventory_window
+        .get_name()?
+        .starts_with("Inventory - Items (I)")
+    {
+        return Err(uiautomation::Error::new(
+            ERR_INACTIVE,
+            "Inventory window is not open in `set_alt_sku`",
+        ))?;
+    }
+    // Verify that the alt sku was entered correctly. If it wasn't, try again, then fail
+    for _ in 0..2 {
+        set_text_box_value(
+            &inventory_window,
+            35_usize + usize::from(sku_index),
+            alt_sku,
+        )?;
+        if get_alt_sku(inventory_window, sku_index)? == alt_sku {
+            return Ok(());
+        }
+    }
+    return Err(uiautomation::Error::new(
+        ERR_NONE,
+        "could not verify that alt sku was entered correctly",
+    ));
+}
+
 pub fn set_desc(inventory_window: &UIElement, desc: &str) -> uiautomation::Result<()> {
     if !inventory_window
         .get_name()?
