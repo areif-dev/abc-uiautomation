@@ -1,11 +1,11 @@
 use bigdecimal::BigDecimal;
 use gtin::Gtin;
 use uiautomation::{
-    errors::{ERR_INACTIVE, ERR_NOTFOUND},
+    errors::{ERR_INACTIVE, ERR_NONE, ERR_NOTFOUND},
     UIAutomation, UIElement,
 };
 
-use crate::{create_matcher_wrapper, set_text_box_value, wait, SHORT_WAIT_MS};
+use crate::{create_matcher_wrapper, read_text_box_value, set_text_box_value, wait, SHORT_WAIT_MS};
 
 /// An *item* represents a product or some other inventory item
 #[derive(Debug, PartialEq)]
@@ -116,7 +116,7 @@ pub fn set_upc(inventory_window: &UIElement, upc: &Gtin) -> uiautomation::Result
     {
         return Err(uiautomation::Error::new(
             ERR_INACTIVE,
-            "Inventory window is not open in `clear_upc`",
+            "Inventory window is not open in `set_upc`",
         ))?;
     }
     let automation = UIAutomation::new()?;
@@ -130,6 +130,128 @@ pub fn set_upc(inventory_window: &UIElement, upc: &Gtin) -> uiautomation::Result
         confirm.send_keys("y", SHORT_WAIT_MS)?;
     }
     Ok(())
+}
+
+pub fn get_upc(inventory_window: &UIElement) -> uiautomation::Result<String> {
+    if !inventory_window
+        .get_name()?
+        .starts_with("Inventory - Items (I)")
+    {
+        return Err(uiautomation::Error::new(
+            ERR_INACTIVE,
+            "Inventory window is not open in `get_upc`",
+        ))?;
+    }
+    read_text_box_value(inventory_window, 38)
+}
+
+pub fn get_sku(inventory_window: &UIElement) -> uiautomation::Result<String> {
+    if !inventory_window
+        .get_name()?
+        .starts_with("Inventory - Items (I)")
+    {
+        return Err(uiautomation::Error::new(
+            ERR_INACTIVE,
+            "Inventory window is not open in `get_sku`",
+        ))?;
+    }
+    read_text_box_value(inventory_window, 0)
+}
+
+pub fn get_desc(inventory_window: &UIElement) -> uiautomation::Result<String> {
+    if !inventory_window
+        .get_name()?
+        .starts_with("Inventory - Items (I)")
+    {
+        return Err(uiautomation::Error::new(
+            ERR_INACTIVE,
+            "Inventory window is not open in `get_desc`",
+        ))?;
+    }
+    read_text_box_value(inventory_window, 1)
+}
+
+pub fn get_list(inventory_window: &UIElement) -> uiautomation::Result<String> {
+    if !inventory_window
+        .get_name()?
+        .starts_with("Inventory - Items (I)")
+    {
+        return Err(uiautomation::Error::new(
+            ERR_INACTIVE,
+            "Inventory window is not open in `set_desc`",
+        ))?;
+    }
+    read_text_box_value(inventory_window, 25)
+}
+
+pub fn get_cost(inventory_window: &UIElement) -> uiautomation::Result<String> {
+    if !inventory_window
+        .get_name()?
+        .starts_with("Inventory - Items (I)")
+    {
+        return Err(uiautomation::Error::new(
+            ERR_INACTIVE,
+            "Inventory window is not open in `get_cost`",
+        ))?;
+    }
+
+    read_text_box_value(&inventory_window, 26)
+}
+
+pub fn get_vendor(inventory_window: &UIElement) -> uiautomation::Result<String> {
+    if !inventory_window
+        .get_name()?
+        .starts_with("Inventory - Items (I)")
+    {
+        return Err(uiautomation::Error::new(
+            ERR_INACTIVE,
+            "Inventory window is not open in `get_vendor`",
+        ))?;
+    }
+
+    read_text_box_value(&inventory_window, 14)
+}
+
+pub fn get_sale_gl(inventory_window: &UIElement) -> uiautomation::Result<String> {
+    if !inventory_window
+        .get_name()?
+        .starts_with("Inventory - Items (I)")
+    {
+        return Err(uiautomation::Error::new(
+            ERR_INACTIVE,
+            "Inventory window is not open in `get_sale_gl`",
+        ))?;
+    }
+
+    read_text_box_value(&inventory_window, 43)
+}
+
+pub fn get_group(inventory_window: &UIElement) -> uiautomation::Result<String> {
+    if !inventory_window
+        .get_name()?
+        .starts_with("Inventory - Items (I)")
+    {
+        return Err(uiautomation::Error::new(
+            ERR_INACTIVE,
+            "Inventory window is not open in `get_group`",
+        ))?;
+    }
+
+    read_text_box_value(&inventory_window, 39)
+}
+
+pub fn get_weight(inventory_window: &UIElement) -> uiautomation::Result<String> {
+    if !inventory_window
+        .get_name()?
+        .starts_with("Inventory - Items (I)")
+    {
+        return Err(uiautomation::Error::new(
+            ERR_INACTIVE,
+            "Inventory window is not open in `get_weight`",
+        ))?;
+    }
+
+    read_text_box_value(&inventory_window, 15)
 }
 
 /// Empties the UPC input field of the Inventory Screen. Can be used to entirely delete all UPCs or
@@ -241,8 +363,17 @@ pub fn set_list(inventory_window: &UIElement, list: &BigDecimal) -> uiautomation
         ))?;
     }
 
-    set_text_box_value(&inventory_window, 25, format!("{:.2}", list))?;
-    Ok(())
+    // If setting the list price fails, try one more time, then fail
+    for _ in 0..2 {
+        set_text_box_value(&inventory_window, 25, format!("{:.2}", list))?;
+        if get_list(inventory_window)? == list.to_plain_string() {
+            return Ok(());
+        }
+    }
+    return Err(uiautomation::Error::new(
+        ERR_NONE,
+        "failed to set list price twice",
+    ));
 }
 
 pub fn set_cost(inventory_window: &UIElement, cost: &BigDecimal) -> uiautomation::Result<()> {
