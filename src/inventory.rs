@@ -5,7 +5,10 @@ use uiautomation::{
     UIAutomation, UIElement,
 };
 
-use crate::{create_matcher_wrapper, read_text_box_value, set_text_box_value, wait, SHORT_WAIT_MS};
+use crate::{
+    create_matcher_wrapper, print_element, read_text_box_value, set_text_box_value,
+    set_text_box_value_no_enter, wait, SHORT_WAIT_MS,
+};
 
 /// An *item* represents a product or some other inventory item
 #[derive(Debug, PartialEq)]
@@ -90,6 +93,12 @@ pub fn load_item(inventory_window: &UIElement, item_number: &str) -> uiautomatio
         .find_first()?;
     item_num_control.click()?;
     item_num_control.send_keys(&format!("{}{{enter}}", item_number), SHORT_WAIT_MS)?;
+    if &get_sku(inventory_window)? != item_number {
+        return Err(uiautomation::Error::new(
+            ERR_NONE,
+            &format!("could not verify that sku {item_number} was entered successfully"),
+        ));
+    }
     Ok(())
 }
 
@@ -120,7 +129,17 @@ pub fn set_upc(inventory_window: &UIElement, upc: &Gtin) -> uiautomation::Result
         ))?;
     }
     let automation = UIAutomation::new()?;
-    set_text_box_value(inventory_window, 38, upc.to_string_no_padding())?;
+    set_text_box_value_no_enter(inventory_window, 38, upc.to_string_no_padding())?;
+    if get_upc(inventory_window)? != upc.to_string_no_padding() {
+        return Err(uiautomation::Error::new(
+            ERR_NONE,
+            &format!(
+                "could not verify that upc {} was set correctly",
+                upc.to_string_no_padding()
+            ),
+        ));
+    }
+    inventory_window.send_keys("{Enter}", SHORT_WAIT_MS)?;
     wait(SHORT_WAIT_MS * 3);
     if let Ok(confirm) = create_matcher_wrapper(&automation)?
         .classname("ThunderRT6FormDC")
@@ -377,8 +396,16 @@ pub fn set_desc(inventory_window: &UIElement, desc: &str) -> uiautomation::Resul
         ))?;
     }
 
-    set_text_box_value(&inventory_window, 1, desc)?;
-    Ok(())
+    for _ in 0..2 {
+        set_text_box_value(&inventory_window, 1, desc)?;
+        if &get_desc(inventory_window)? == desc {
+            return Ok(());
+        }
+    }
+    return Err(uiautomation::Error::new(
+        ERR_NONE,
+        &format!("could not verify that desc {desc} was entered correctly"),
+    ));
 }
 
 pub fn set_vendor(inventory_window: &UIElement, vendor: &str) -> uiautomation::Result<()> {
@@ -392,8 +419,17 @@ pub fn set_vendor(inventory_window: &UIElement, vendor: &str) -> uiautomation::R
         ))?;
     }
 
-    set_text_box_value(&inventory_window, 14, vendor)?;
-    Ok(())
+    for _ in 0..2 {
+        set_text_box_value(&inventory_window, 14, vendor)?;
+        if &get_vendor(inventory_window)? == vendor {
+            return Ok(());
+        }
+    }
+
+    return Err(uiautomation::Error::new(
+        ERR_NONE,
+        &format!("could not verify that vendor {vendor} was entered correctly"),
+    ));
 }
 
 pub fn set_weight(inventory_window: &UIElement, weight: f64) -> uiautomation::Result<()> {
@@ -407,8 +443,16 @@ pub fn set_weight(inventory_window: &UIElement, weight: f64) -> uiautomation::Re
         ))?;
     }
 
-    set_text_box_value(&inventory_window, 15, format!("{:.2}", weight))?;
-    Ok(())
+    for _ in 0..2 {
+        set_text_box_value(&inventory_window, 15, format!("{:.2}", weight))?;
+        if get_weight(inventory_window)? == weight.to_string() {
+            return Ok(());
+        }
+    }
+    return Err(uiautomation::Error::new(
+        ERR_NONE,
+        &format!("could not verify that weight {weight} was entered correctly"),
+    ));
 }
 
 pub fn set_list(inventory_window: &UIElement, list: &BigDecimal) -> uiautomation::Result<()> {
@@ -446,8 +490,16 @@ pub fn set_cost(inventory_window: &UIElement, cost: &BigDecimal) -> uiautomation
         ))?;
     }
 
-    set_text_box_value(&inventory_window, 26, format!("{:.2}", cost))?;
-    Ok(())
+    for _ in 0..2 {
+        set_text_box_value(&inventory_window, 26, format!("{:.2}", cost))?;
+        if get_cost(inventory_window)? == cost.to_string() {
+            return Ok(());
+        }
+    }
+    return Err(uiautomation::Error::new(
+        ERR_NONE,
+        &format!("could not verify that cost {cost} was entered correctly"),
+    ));
 }
 
 pub fn set_group(inventory_window: &UIElement, group: &str) -> uiautomation::Result<()> {
@@ -461,8 +513,16 @@ pub fn set_group(inventory_window: &UIElement, group: &str) -> uiautomation::Res
         ))?;
     }
 
-    set_text_box_value(&inventory_window, 39, group.to_string())?;
-    Ok(())
+    for _ in 0..2 {
+        set_text_box_value(&inventory_window, 39, group.to_string())?;
+        if &get_group(inventory_window)? == group {
+            return Ok(());
+        }
+    }
+    return Err(uiautomation::Error::new(
+        ERR_NONE,
+        &format!("could not verify that group {group} was entered correctly"),
+    ));
 }
 
 pub fn set_sale_gl(inventory_window: &UIElement, sale_gl: u32) -> uiautomation::Result<()> {
@@ -476,8 +536,16 @@ pub fn set_sale_gl(inventory_window: &UIElement, sale_gl: u32) -> uiautomation::
         ))?;
     }
 
-    set_text_box_value(&inventory_window, 43, sale_gl.to_string())?;
-    Ok(())
+    for _ in 0..2 {
+        set_text_box_value(&inventory_window, 43, sale_gl.to_string())?;
+        if get_sale_gl(inventory_window)? == sale_gl.to_string() {
+            return Ok(());
+        }
+    }
+    return Err(uiautomation::Error::new(
+        ERR_NONE,
+        &format!("could not verify that sale gl {sale_gl} was entered correctly"),
+    ));
 }
 
 #[cfg(test)]

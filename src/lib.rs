@@ -239,6 +239,32 @@ pub fn set_text_box_value(
     Ok(())
 }
 
+pub fn set_text_box_value_no_enter(
+    screen: &UIElement,
+    box_index: usize,
+    value: impl ToString,
+) -> uiautomation::Result<()> {
+    let automation = UIAutomation::new()?;
+    let all_text_boxes = create_matcher_wrapper(&automation)?
+        .from(screen.to_owned())
+        .classname("ThunderRT6TextBox")
+        .find_all()?;
+
+    let desired_txtbx = match all_text_boxes.get(box_index) {
+        Some(b) => b,
+        None => {
+            return Err(uiautomation::Error::new(
+                2,
+                &format!("No textbox found at index {}", box_index),
+            ))
+        }
+    };
+    desired_txtbx.click()?;
+    desired_txtbx.send_keys(&format!("{{Delete}}{}", value.to_string()), SHORT_WAIT_MS)?;
+
+    Ok(())
+}
+
 pub fn data_file_is_ready(path: &str) -> Result<bool, std::io::Error> {
     match std::fs::OpenOptions::new()
         .append(true)
