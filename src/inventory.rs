@@ -375,7 +375,7 @@ pub fn set_alt_sku(
             35_usize + usize::from(sku_index),
             alt_sku,
         )?;
-        if get_alt_sku(inventory_window, sku_index)? == alt_sku {
+        if get_alt_sku(inventory_window, sku_index)?.trim() == alt_sku.trim() {
             return Ok(());
         }
     }
@@ -398,7 +398,7 @@ pub fn set_desc(inventory_window: &UIElement, desc: &str) -> uiautomation::Resul
 
     for _ in 0..2 {
         set_text_box_value(&inventory_window, 1, desc)?;
-        if &get_desc(inventory_window)? == desc {
+        if get_desc(inventory_window)?.trim() == desc.trim() {
             return Ok(());
         }
     }
@@ -421,7 +421,7 @@ pub fn set_vendor(inventory_window: &UIElement, vendor: &str) -> uiautomation::R
 
     for _ in 0..2 {
         set_text_box_value(&inventory_window, 14, vendor)?;
-        if &get_vendor(inventory_window)? == vendor {
+        if get_vendor(inventory_window)?.trim() == vendor.trim() {
             return Ok(());
         }
     }
@@ -445,7 +445,7 @@ pub fn set_weight(inventory_window: &UIElement, weight: f64) -> uiautomation::Re
 
     for _ in 0..2 {
         set_text_box_value(&inventory_window, 15, format!("{:.2}", weight))?;
-        if get_weight(inventory_window)? == weight.to_string() {
+        if get_weight(inventory_window)? == format!("{:.2}", weight) {
             return Ok(());
         }
     }
@@ -469,7 +469,7 @@ pub fn set_list(inventory_window: &UIElement, list: &BigDecimal) -> uiautomation
     // If setting the list price fails, try one more time, then fail
     for _ in 0..2 {
         set_text_box_value(&inventory_window, 25, format!("{:.2}", list))?;
-        if get_list(inventory_window)? == list.to_plain_string() {
+        if get_list(inventory_window)? == format!("{:.2}", list) {
             return Ok(());
         }
     }
@@ -492,7 +492,7 @@ pub fn set_cost(inventory_window: &UIElement, cost: &BigDecimal) -> uiautomation
 
     for _ in 0..2 {
         set_text_box_value(&inventory_window, 26, format!("{:.2}", cost))?;
-        if get_cost(inventory_window)? == cost.to_string() {
+        if get_cost(inventory_window)? == format!("{:.2}", cost) {
             return Ok(());
         }
     }
@@ -538,7 +538,7 @@ pub fn set_sale_gl(inventory_window: &UIElement, sale_gl: u32) -> uiautomation::
 
     for _ in 0..2 {
         set_text_box_value(&inventory_window, 43, sale_gl.to_string())?;
-        if get_sale_gl(inventory_window)? == sale_gl.to_string() {
+        if get_sale_gl(inventory_window)?.trim() == sale_gl.to_string().trim() {
             return Ok(());
         }
     }
