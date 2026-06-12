@@ -12,7 +12,7 @@ pub use uiautomation::UIElement;
 pub const MILLIS: u64 = 1;
 pub const SECONDS: u64 = 1000 * MILLIS;
 pub const MINUTES: u64 = 60 * SECONDS;
-pub const SHORT_WAIT_MS: u64 = 30 * MILLIS;
+pub const SHORT_WAIT_MS: u64 = 80 * MILLIS;
 
 /// Convenience function that wraps `UIAutomation.create_matcher()`. Sets `from` to the root
 /// element, and sets the `timeout` to `SHORT_WAIT_MS * 30`
