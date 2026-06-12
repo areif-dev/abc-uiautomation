@@ -304,24 +304,30 @@ pub fn find_popup(abc_window: &UIElement) -> uiautomation::Result<Option<UIEleme
         .ok())
 }
 
-pub fn login(abc_window: &UIElement, username: &str, password: &str) -> uiautomation::Result<()> {
+pub fn load_login_screen(abc_window: &UIElement) -> uiautomation::Result<UIElement> {
     let automation = UIAutomation::new()?;
 
-    abc_window.send_keys("{F10}*", SHORT_WAIT_MS / 2)?;
-    if let Some(u) = find_popup(&abc_window)? {
-        return Err(uiautomation::Error::new(
-            2,
-            &format!("Unexpected popup when going to login screen: {:?}", u),
-        ));
-    }
+    let match_name = "Utilities - System Date and Time";
+    abc_window.send_keys("{F10}*", SHORT_WAIT_MS * 3)?;
+    create_matcher_wrapper(&automation)?
+        .contains_name(match_name)
+        .find_first()
+}
 
-    let login_window = create_matcher_wrapper(&automation)?
-        .contains_name("Utilities - System Date and Time (*)")
-        .find_first()?;
+pub fn login(abc_window: &UIElement, username: &str, password: &str) -> uiautomation::Result<()> {
+    let login_window = load_login_screen(abc_window)?;
+    set_text_box_value(&login_window, 2, username)?;
+    set_text_box_value(&login_window, 0, password)?;
+    // if read_text_box_value(&login_window, 3)?.to_lowercase() != username.to_lowercase() {
+    //     return Err(uiautomation::Error::new(
+    //         2,
+    //         "Username was not set correctly while logging into ABC",
+    //     ));
+    // }
 
-    login_window.send_keys(&format!("{}{{enter}}", username), SHORT_WAIT_MS)?;
+    print_element(&abc_window)?;
+    return Ok(());
 
-    wait(500 * MILLIS);
     if let Some(u) = find_popup(&abc_window)? {
         return Err(uiautomation::Error::new(
             2,
