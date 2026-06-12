@@ -319,8 +319,9 @@ pub fn login(abc_window: &UIElement, username: &str, password: &str) -> uiautoma
         .contains_name("Utilities - System Date and Time (*)")
         .find_first()?;
 
-    login_window.send_keys(&format!("{}{{enter}}", username), SHORT_WAIT_MS / 2)?;
+    login_window.send_keys(&format!("{}{{enter}}", username), SHORT_WAIT_MS)?;
 
+    wait(500 * MILLIS);
     if let Some(u) = find_popup(&abc_window)? {
         return Err(uiautomation::Error::new(
             2,
@@ -332,6 +333,8 @@ pub fn login(abc_window: &UIElement, username: &str, password: &str) -> uiautoma
     }
 
     login_window.send_keys(&format!("{}{{enter}}", password), SHORT_WAIT_MS)?;
+
+    wait(500 * MILLIS);
     if let Some(u) = find_popup(&abc_window)? {
         println!("{:?}", u.get_bounding_rectangle()?);
         return Err(uiautomation::Error::new(
