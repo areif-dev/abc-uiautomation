@@ -6,8 +6,8 @@ use uiautomation::{
 };
 
 use crate::{
-    create_matcher_wrapper, print_element, read_text_box_value, set_text_box_value,
-    set_text_box_value_no_enter, wait, SHORT_WAIT_MS,
+    create_matcher_wrapper, read_text_box_value, set_text_box_value, set_text_box_value_no_enter,
+    wait, SHORT_WAIT_MS,
 };
 
 /// An *item* represents a product or some other inventory item
