@@ -314,42 +314,73 @@ pub fn load_login_screen(abc_window: &UIElement) -> uiautomation::Result<UIEleme
         .find_first()
 }
 
+fn verify_login(
+    abc_window: &UIElement,
+    login_screen: &UIElement,
+    username: &str,
+) -> uiautomation::Result<()> {
+    let login_screen_name_is_correct = login_screen
+        .get_name()?
+        .starts_with("Utilities - System Date and Time");
+    if !login_screen_name_is_correct {
+        return Err(uiautomation::Error::new(
+            2,
+            "Supplied incorrect uielement for ABC login screen",
+        ));
+    }
+
+    let abc_window_named_correctly = abc_window.get_name()?.contains("ABC Accounting Client");
+    if !abc_window_named_correctly {
+        return Err(uiautomation::Error::new(
+            2,
+            "Supplied incorrect uielement for ABC window",
+        ));
+    }
+
+    let automation = UIAutomation::new()?;
+    let all_text_boxes = create_matcher_wrapper(&automation)?
+        .from(login_screen.clone())
+        .classname("ThunderRT6TextBox")
+        .find_all()?;
+    let only_three_text_boxes = all_text_boxes.len() == 3;
+    if !only_three_text_boxes {
+        return Err(uiautomation::Error::new(
+            2,
+            &format!(
+                "Expected login window to only have 3 text boxes, but found {}",
+                all_text_boxes.len()
+            ),
+        ));
+    }
+    if let Some(_popup) = find_popup(abc_window)? {
+        return Err(uiautomation::Error::new(
+            2,
+            "Encountered popup while logging into ABC. You are not logged in",
+        ));
+    }
+    let username_correct =
+        read_text_box_value(login_screen, 2)?.to_lowercase() == username.to_lowercase();
+    if !username_correct {
+        return Err(uiautomation::Error::new(
+            2,
+            "Username was not set correctly while logging into ABC",
+        ));
+    }
+    Ok(())
+}
+
 pub fn login(abc_window: &UIElement, username: &str, password: &str) -> uiautomation::Result<()> {
-    let login_window = load_login_screen(abc_window)?;
-    set_text_box_value(&login_window, 2, username)?;
-    set_text_box_value(&login_window, 0, password)?;
-    // if read_text_box_value(&login_window, 3)?.to_lowercase() != username.to_lowercase() {
-    //     return Err(uiautomation::Error::new(
-    //         2,
-    //         "Username was not set correctly while logging into ABC",
-    //     ));
-    // }
-
-    print_element(&abc_window)?;
-    return Ok(());
-
-    if let Some(u) = find_popup(&abc_window)? {
+    let abc_window_named_correctly = abc_window.get_name()?.contains("ABC Accounting Client");
+    if !abc_window_named_correctly {
         return Err(uiautomation::Error::new(
             2,
-            &format!(
-                "Unexpected popup when submitting username on login screen: {:?}",
-                u
-            ),
+            "Supplied incorrect uielement for ABC window",
         ));
     }
 
-    login_window.send_keys(&format!("{}{{enter}}", password), SHORT_WAIT_MS)?;
-
-    wait(500 * MILLIS);
-    if let Some(u) = find_popup(&abc_window)? {
-        println!("{:?}", u.get_bounding_rectangle()?);
-        return Err(uiautomation::Error::new(
-            2,
-            &format!(
-                "Unexpected popup when submitting password on login screen: {:?}",
-                u
-            ),
-        ));
-    }
+    let login_screen = load_login_screen(abc_window)?;
+    set_text_box_value(&login_screen, 2, username)?;
+    set_text_box_value(&login_screen, 0, password)?;
+    verify_login(abc_window, &login_screen, username)?;
     Ok(())
 }
