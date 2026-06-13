@@ -380,6 +380,9 @@ pub fn login(abc_window: &UIElement, username: &str, password: &str) -> uiautoma
 
     let login_screen = load_login_screen(abc_window)?;
     set_text_box_value(&login_screen, 2, username)?;
+    if let Some(popup) = find_popup(abc_window)? {
+        return Err(uiautomation::Error::new(2, &format!("Encountered unexpected popup after entering username. Your username is probably incorrect {:?}", popup)));
+    }
     set_text_box_value(&login_screen, 0, password)?;
     verify_login(abc_window, &login_screen, username)?;
     Ok(())
