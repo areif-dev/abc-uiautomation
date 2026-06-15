@@ -3,6 +3,7 @@ pub mod customer_file;
 pub mod inventory;
 pub mod reports;
 
+use std::time::Duration;
 use std::{thread, time};
 use uiautomation::{UIAutomation, UIMatcher, UITreeWalker};
 
@@ -265,31 +266,40 @@ pub fn set_text_box_value_no_enter(
     Ok(())
 }
 
-pub fn data_file_is_ready(path: &str) -> Result<bool, std::io::Error> {
-    match std::fs::OpenOptions::new()
+pub async fn data_file_is_ready(path: &str) -> Result<bool, tokio::io::Error> {
+    let windows_fs_write_lock = 32;
+    match tokio::fs::OpenOptions::new()
         .append(true)
         .create(false)
         .open(path)
+        .await
     {
         Ok(_) => return Ok(true),
         Err(e) => match e.raw_os_error() {
-            Some(i) => {
-                // Error 32 means that the file is being written to by another program. This is
-                // expected with large data exports from ABC
-                if i == 32 {
-                    return Ok(false);
-                } else {
-                    return Err(e);
-                }
-            }
-            None => {
-                return Err(std::io::Error::new(
-                    std::io::ErrorKind::Other,
-                    "Encountered unexpected error which checking for a file",
-                ))
-            }
+            Some(i) if i == windows_fs_write_lock => return Ok(false),
+            _ => return Err(e),
         },
     }
+}
+
+pub async fn await_data_file_ready(
+    path: &str,
+    max_wait: Duration,
+) -> Result<tokio::fs::File, tokio::io::Error> {
+    let start = std::time::Instant::now();
+    while start.elapsed() < max_wait {
+        match data_file_is_ready(path).await {
+            Ok(true) => return tokio::fs::OpenOptions::new().read(true).open(path).await,
+            Ok(false) => {}
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
+            Err(e) => return Err(e),
+        }
+        tokio::time::sleep(Duration::from_millis(500)).await;
+    }
+    Err(std::io::Error::new(
+        std::io::ErrorKind::TimedOut,
+        format!("Timeout waiting for data file to be ready: {}", path),
+    ))
 }
 
 pub fn find_popup(abc_window: &UIElement) -> uiautomation::Result<Option<UIElement>> {

@@ -1,6 +1,6 @@
 [package]
 name = "abc-uiautomation"
-version = "1.4.7"
+version = "1.4.8"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -11,3 +11,4 @@ chrono = "0.4"
 uiautomation = "0.7"
 gtin = { git = "https://github.com/areif-dev/gtin", version = "1.0.0" }
 bigdecimal = "0.4.10"
+tokio = { version = "1.52.3", features = ["fs", "time", "rt"] }
