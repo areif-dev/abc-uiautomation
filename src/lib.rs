@@ -3,6 +3,7 @@ pub mod customer_file;
 pub mod inventory;
 pub mod reports;
 
+use std::path::PathBuf;
 use std::time::Duration;
 use std::{thread, time};
 use uiautomation::{UIAutomation, UIMatcher, UITreeWalker};
@@ -266,7 +267,7 @@ pub fn set_text_box_value_no_enter(
     Ok(())
 }
 
-pub async fn data_file_is_ready(path: &str) -> Result<bool, tokio::io::Error> {
+pub async fn data_file_is_ready(path: &PathBuf) -> Result<bool, tokio::io::Error> {
     let windows_fs_write_lock = 32;
     match tokio::fs::OpenOptions::new()
         .append(true)
@@ -283,12 +284,12 @@ pub async fn data_file_is_ready(path: &str) -> Result<bool, tokio::io::Error> {
 }
 
 pub async fn await_data_file_ready(
-    path: &str,
+    path: &PathBuf,
     max_wait: Duration,
 ) -> Result<tokio::fs::File, tokio::io::Error> {
     let start = std::time::Instant::now();
     while start.elapsed() < max_wait {
-        match data_file_is_ready(path).await {
+        match data_file_is_ready(&path).await {
             Ok(true) => return tokio::fs::OpenOptions::new().read(true).open(path).await,
             Ok(false) => {}
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
@@ -298,7 +299,10 @@ pub async fn await_data_file_ready(
     }
     Err(std::io::Error::new(
         std::io::ErrorKind::TimedOut,
-        format!("Timeout waiting for data file to be ready: {}", path),
+        format!(
+            "Timeout waiting for data file to be ready: {}",
+            path.to_string_lossy()
+        ),
     ))
 }
 
