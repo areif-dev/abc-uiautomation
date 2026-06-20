@@ -267,13 +267,12 @@ pub fn set_text_box_value_no_enter(
     Ok(())
 }
 
-pub async fn data_file_is_ready(path: &PathBuf) -> Result<bool, tokio::io::Error> {
+pub fn data_file_is_ready(path: &PathBuf) -> Result<bool, std::io::Error> {
     let windows_fs_write_lock = 32;
-    match tokio::fs::OpenOptions::new()
+    match std::fs::OpenOptions::new()
         .append(true)
         .create(false)
         .open(path)
-        .await
     {
         Ok(_) => return Ok(true),
         Err(e) => match e.raw_os_error() {
@@ -283,19 +282,19 @@ pub async fn data_file_is_ready(path: &PathBuf) -> Result<bool, tokio::io::Error
     }
 }
 
-pub async fn await_data_file_ready(
+pub fn await_data_file_ready(
     path: &PathBuf,
     max_wait: Duration,
-) -> Result<tokio::fs::File, tokio::io::Error> {
+) -> Result<std::fs::File, std::io::Error> {
     let start = std::time::Instant::now();
     while start.elapsed() < max_wait {
-        match data_file_is_ready(&path).await {
-            Ok(true) => return tokio::fs::OpenOptions::new().read(true).open(path).await,
+        match data_file_is_ready(&path) {
+            Ok(true) => return std::fs::OpenOptions::new().read(true).open(path),
             Ok(false) => {}
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
             Err(e) => return Err(e),
         }
-        tokio::time::sleep(Duration::from_millis(500)).await;
+        std::thread::sleep(Duration::from_millis(500));
     }
     Err(std::io::Error::new(
         std::io::ErrorKind::TimedOut,

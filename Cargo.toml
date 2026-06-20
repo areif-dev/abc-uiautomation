@@ -11,4 +11,3 @@ chrono = "0.4"
 uiautomation = "0.7"
 gtin = { git = "https://github.com/areif-dev/gtin", version = "1.0.0" }
 bigdecimal = "0.4.10"
-tokio = { version = "1.52", features = ["fs", "time", "rt"] }
