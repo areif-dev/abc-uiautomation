@@ -1,6 +1,11 @@
+use std::time::Duration;
+
 use uiautomation::UIAutomation;
 
-use crate::{wait, UIElement, SHORT_WAIT_MS};
+use crate::{
+    create_matcher_wrapper, print_element, set_text_box_value, set_text_box_value_no_enter, wait,
+    UIElement, SHORT_WAIT_MS,
+};
 
 /// Control ABC Client4 to generate any simple report that follows the pattern:
 /// * Open F10
@@ -134,13 +139,7 @@ pub fn generate_report_11(
 /// the ABC provided default is used
 /// * `ending_with` - The value to end the exported report at. If a null string is passed, then the
 /// ABC provided default is used
-pub fn generate_report_710(
-    abc_window: &UIElement,
-    file: &str,
-    delete_existing_data: bool,
-    starting_at: &str,
-    ending_with: &str,
-) -> uiautomation::Result<()> {
+pub fn generate_report_710(abc_window: &UIElement, file: &str) -> uiautomation::Result<()> {
     let automation = UIAutomation::new()?;
     abc_window.send_keys("{F10}7", SHORT_WAIT_MS * 3)?;
     wait(SHORT_WAIT_MS);
@@ -151,21 +150,16 @@ pub fn generate_report_710(
     {
         return Err(uiautomation::Error::new(2, &format!("ABC threw an 'Information' popup when loading the 7 report file. This probably because the user is not logged in.")));
     }
-    abc_window.send_keys("10{enter}", SHORT_WAIT_MS)?;
+    let special_reports_screen = create_matcher_wrapper(&automation)?
+        .contains_name("Utilities - Special User Reports")
+        .find_first()?;
+    set_text_box_value(&special_reports_screen, 1, "10")?;
+    set_text_box_value(&special_reports_screen, 0, file)?;
+    set_text_box_value_no_enter(&special_reports_screen, 0, "N")?;
+    let report_screen = create_matcher_wrapper(&automation)?
+        .name("r screen")
+        .find_first()?;
     wait(SHORT_WAIT_MS * 3);
-    abc_window.send_keys(&format!("{}{{enter}}", file), SHORT_WAIT_MS)?;
-    wait(SHORT_WAIT_MS * 3);
-    if delete_existing_data {
-        abc_window.send_keys("y", SHORT_WAIT_MS)?;
-    } else {
-        abc_window.send_keys("n", SHORT_WAIT_MS)?;
-    }
-    wait(SHORT_WAIT_MS * 5);
-    abc_window.send_keys("{enter}", SHORT_WAIT_MS)?;
-    wait(SHORT_WAIT_MS);
-    abc_window.send_keys(
-        &format!("{}{{enter}}{}{{enter}}S", starting_at, ending_with),
-        SHORT_WAIT_MS * 2,
-    )?;
+    print_element(&report_screen)?;
     Ok(())
 }
