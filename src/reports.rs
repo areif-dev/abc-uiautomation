@@ -159,7 +159,6 @@ pub fn generate_report_710(abc_window: &UIElement, file: &str) -> uiautomation::
     let report_screen = create_matcher_wrapper(&automation)?
         .name("r screen")
         .find_first()?;
-    wait(SHORT_WAIT_MS * 3);
-    print_element(&report_screen)?;
+    set_text_box_value_no_enter(&report_screen, 10, "S")?;
     Ok(())
 }
