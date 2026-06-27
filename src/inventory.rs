@@ -396,8 +396,10 @@ pub fn set_desc(inventory_window: &UIElement, desc: &str) -> uiautomation::Resul
         ))?;
     }
 
+    let mut desc = desc.to_string();
+    desc.truncate(40);
     for _ in 0..2 {
-        set_text_box_value(&inventory_window, 1, desc)?;
+        set_text_box_value(&inventory_window, 1, &desc)?;
         if get_desc(inventory_window)?.trim() == desc.trim() {
             return Ok(());
         }

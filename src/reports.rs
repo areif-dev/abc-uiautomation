@@ -1,10 +1,8 @@
-use std::time::Duration;
-
 use uiautomation::UIAutomation;
 
 use crate::{
-    create_matcher_wrapper, print_element, set_text_box_value, set_text_box_value_no_enter, wait,
-    UIElement, SHORT_WAIT_MS,
+    create_matcher_wrapper, set_text_box_value, set_text_box_value_no_enter, wait, UIElement,
+    SHORT_WAIT_MS,
 };
 
 /// Control ABC Client4 to generate any simple report that follows the pattern:
