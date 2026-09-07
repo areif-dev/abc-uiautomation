@@ -472,6 +472,7 @@ pub fn set_list(inventory_window: &UIElement, list: &BigDecimal) -> uiautomation
     for _ in 0..2 {
         set_text_box_value_no_enter(&inventory_window, 25, list.to_plain_string())?;
         if get_list(inventory_window)? == list.to_plain_string() {
+            inventory_window.send_keys("{Enter}", 0)?;
             return Ok(());
         }
     }
@@ -495,6 +496,7 @@ pub fn set_cost(inventory_window: &UIElement, cost: &BigDecimal) -> uiautomation
     for _ in 0..2 {
         set_text_box_value_no_enter(&inventory_window, 26, cost.to_plain_string())?;
         if get_cost(inventory_window)? == format!("{:.2}", cost.to_plain_string()) {
+            inventory_window.send_keys("{Enter}", 0)?;
             return Ok(());
         }
     }
